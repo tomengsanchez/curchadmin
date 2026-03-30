@@ -1,6 +1,5 @@
-# PAPeR – Development Guide
-
-This document describes the project structure, frameworks, database schema, and important conventions for developers.
+# Admin Scaffold – Development Guide
+This document describes the project structure, stack conventions, database schema, and extension rules for developers.
 
 ---
 
@@ -9,61 +8,53 @@ This document describes the project structure, frameworks, database schema, and 
 ```
 paper/
 ├── App/
-│   ├── Controllers/       # HTTP controllers (Controller@action)
-│   │   └── Api/           # API controllers (e.g. ApiController, GrievanceController, StructureController)
-│   ├── Models/            # Domain models (Profile, Structure, Grievance, Project, etc.)
-│   ├── Views/             # PHP view templates by module (profile/, structure/, grievance/, etc.)
-│   │   ├── layout/        # main.php (master layout: sidebar or top nav)
-│   │   └── partials/      # list_pagination.php, list_toolbar.php, history_sidebar.php
-│   ├── Capabilities.php   # Central registry of role capabilities and menu visibility
-│   ├── UserUiSettings.php # Per-user UI (theme, sidebar vs top vs mobile-friendly layout) – stored in user_dashboard_config
-│   ├── UserNotificationSettings.php # Per-user notification preferences – user_dashboard_config
-│   ├── NotificationService.php # Create/fetch notifications; list history with filters
-│   ├── AuditLog.php       # Generic entity history (created/updated/status_changed)
-│   ├── UserProjects.php    # Resolve allowed project IDs for current user
-│   ├── DashboardConfig.php # Grievance dashboard widget config
-│   ├── ListHelper.php     # List column helpers
-│   ├── ListConfig.php     # Column config (table + export); getExportColumns for all available fields
-│   ├── CsvExporter.php    # CSV stream export
-│   ├── ApiToken.php       # REST Bearer token create/validate/revoke (api_tokens table)
-│   ├── UserSession.php    # Track active sessions (user_sessions table); onLogin, touchOrEnforceForCurrent
-│   └── ...
+│   ├── Controllers/        # HTTP controllers (Controller@action)
+│   │   ├── Api/           # API controllers (under /api/*)
+│   │   └── *.php          # e.g. UserController, SettingsController, AuthController
+│   ├── Views/             # PHP view templates
+│   │   ├── layout/       # main.php (master layout: sidebar or top nav)
+│   │   └── partials/     # reusable UI fragments (list_*, history_sidebar.php)
+│   ├── Capabilities.php   # RBAC capability registry + menu mapping helpers
+│   ├── UserUiSettings.php # Per-user UI (theme/layout/mobile-friendly)
+│   ├── UserNotificationSettings.php # Per-user notification preferences (scaffold-only by default)
+│   ├── NotificationService.php       # Notification persistence + in-app history helpers
+│   ├── AuditLog.php       # Generic entity history (created/updated/...)
+│   ├── UserProjects.php  # Optional product scoping hook (currently no-op / returns null)
+│   ├── DashboardConfig.php # Dashboard widget/config helper
+│   ├── ListHelper.php     # List operations: search/sort/paginate
+│   ├── ListConfig.php     # Column config (list + export UI)
+│   ├── CsvExporter.php    # CSV streaming export
+│   ├── ApiToken.php       # REST Bearer token create/validate/revoke
+│   ├── UserSession.php    # Track active sessions (user_sessions table)
+│   ├── PasswordPolicy.php # Enforce password rules + history
+│   ├── GeneralSettings.php
+│   ├── DevelopmentSettings.php
+│   └── DevClock.php
 ├── Core/                  # Framework core
-│   ├── Router.php         # Route registration and dispatch (Controller@action)
-│   ├── Controller.php     # Base controller (view, redirect, requireAuth, requireCapability, requireAuthApi, validateCsrf)
-│   ├── Auth.php           # Session auth, capabilities, login/logout; Bearer token for API when no session
-│   ├── Database.php       # PDO singleton
-│   ├── Csrf.php           # CSRF token generation/validation
-│   ├── MigrationRunner.php # Runs and rolls back database/migration_*.php
-│   ├── Logger.php         # Error logging
-│   ├── Mailer.php         # SMTP mail
-│   ├── LoginThrottle.php  # Login attempt throttling (configurable via Security Settings)
-│   ├── Helpers.php        # Shared helper functions
-│   ├── SystemDebug.php    # Request debug / class-load logging
-│   └── LoggingPDO.php / LoggingStatement.php # Optional query logging when SystemDebug is collecting
+│   ├── Router.php
+│   ├── Controller.php
+│   ├── Auth.php
+│   ├── Database.php
+│   ├── Csrf.php
+│   ├── MigrationRunner.php
+│   ├── Logger.php
+│   ├── Mailer.php
+│   ├── LoginThrottle.php
+│   ├── SystemDebug.php
+│   └── ...
 ├── config/
 │   ├── database.php       # DB credentials (copy from database-sample.php)
 │   └── app.php            # Optional base_url (copy from app-sample.php)
 ├── database/
-│   ├── migration_*.php    # Schema migrations (run via cli/migrate.php)
-│   ├── seed_grievance_options.php  # Seed grievance lookup tables
-│   ├── seed_profiles_structures.php
-│   ├── seed_profiles_structures_with_project_levels.php # Same as above + project-specific grievance stages
-│   ├── seed_profiles_structures_with_default_levels.php # Same as above + default-only grievance stages
-│   ├── seed_progress_levels_default.php # Seed only default Level 1/2/3 fallback stages
-│   ├── seed_grievances.php
-│   └── seed_audit_log.php # Optional seed for audit_log
+│   └── migration_*.php    # Schema migrations (currently 000 + 001)
 ├── cli/
-│   ├── migrate.php        # Run migrations; --status; --rollback [--steps=N]
-│   ├── send_queued_emails.php     # Send pending notification emails from email_queue (run via cron)
-│   ├── remap_progress_levels.php  # Re-map grievance/status-log progress levels to project-specific levels
-│   ├── truncate_seed_tables.php   # Truncate notifications, audit_log, grievance*, structures, profiles, projects
-│   └── truncate_grievances.php    # Truncate grievance attachments/status/history, grievances, respondents
+│   ├── migrate.php        # Run migrations; status; rollback
+│   └── send_queued_emails.php # Send pending email_queue rows (cron)
 ├── public/                # Web root (DocumentRoot should point here)
 │   └── index.php          # Front controller – defines all routes
-├── logs/                  # php_error.log, database_error.log, auth.log
+├── logs/                  # php_error.log, auth.log
 ├── bootstrap.php          # Autoload, ROOT, DB init, Auth init, BASE_URL
-└── index.php              # For doc root = project root: forwards to public/index.php
+└── index.php              # If doc root = project root: forwards to public/index.php
 ```
 
 ---
@@ -75,7 +66,7 @@ paper/
 - **Frontend:** Bootstrap 5.3.2, jQuery 3.7.1, Select2. Layout and theme in `App/Views/layout/main.php`.
 - **Routing:** `Core\Router`: routes in `public/index.php`; pattern `Controller@action`; path params like `{id}`.
 - **Auth:** Session-based; `Core\Auth` (check, user, id, can, login, logout). Roles: Administrator, Standard User, Coordinator. Capabilities in `role_capabilities`; admin bypasses checks. Optional **idle session timeout** (`user_logout_after_minutes` in Security Settings; 0 = disabled). Optional **email-based 2FA** (Security Settings: enable_email_2fa, 2fa_expiration_minutes); routes `/login/2fa`, `/login/2fa/verify`.
-- **API auth:** For requests under `/api/`, when no session exists, Bearer token is accepted via `App\ApiToken::validate()`; tokens stored hashed in `api_tokens` (migration 020). Use `$this->requireAuthApi()` in API controllers to return 401 JSON when unauthenticated.
+- **API auth:** For requests under `/api/`, when no session exists, Bearer token is accepted via `App\ApiToken::validate()`; tokens stored hashed in `api_tokens`. Use `$this->requireAuthApi()` in API controllers to return 401 JSON when unauthenticated.
 - **CSRF:** `Core\Csrf::validate()`; call `$this->validateCsrf()` at start of any POST action (web only; API uses token).
 
 ---
@@ -84,56 +75,36 @@ paper/
 
 - Routes are registered in `public/index.php` with `$router->get(...)` and `$router->post(...)`.
 - Handler format: `'ControllerName@methodName'`. Controller class: `App\Controllers\ControllerName`. For API routes the handler may be `'Api\ControllerName@methodName'` (class `App\Controllers\Api\ControllerName`).
-- Path parameters: e.g. `/profile/view/{id}` → `ProfileController::show(int $id)`.
+- Path parameters: e.g. `/entity/view/{id}` → `EntityController::show(int $id)`.
 - Controllers extend `Core\Controller`; use `$this->view('module/viewname', $data)`, `$this->redirect()`, `$this->json()`, `$this->requireAuth()`, `$this->requireAuthApi()` (API), `$this->requireCapability('capability_name')`, `$this->validateCsrf()`.
 
 ---
 
 ## 4. Database structure
+This scaffold keeps DB schema minimal and generic. Your product-specific tables should live in future `migration_00x_*.php` files.
 
-### 4.1 Core tables (migration_000 and later)
-
-- **roles** – id, name (e.g. Administrator, Standard User, Coordinator)
-- **users** – id, username, email, password_hash, password_changed_at (migration_022), role_id, display_name (migration_015), created_at, updated_at
+### 4.1 Core tables (`migration_000_initial.php`)
+- **roles** – id, name (e.g. Administrator)
+- **users** – id, username, email, password_hash, password_changed_at, display_name, role_id, timestamps
 - **app_settings** – setting_key, setting_value, updated_at
-- **role_capabilities** – id, role_id, capability (e.g. view_profiles, add_profiles); UNIQUE(role_id, capability)
-- **migrations** – id, name, ran_at (used by MigrationRunner)
+- **role_capabilities** – id, role_id, capability (UNIQUE(role_id, capability))
+- **migrations** – migration history table (MigrationRunner)
 
-### 4.2 Flat entity tables (migration_001 and later)
+### 4.2 Platform tables (`migration_001_platform.php`)
+- **user_list_columns** – per-user selected columns for list UIs
+- **user_dashboard_config** – per-user dashboard widget/config JSON
+- **notifications** – in-app notification persistence + clicked/opened state
+- **audit_log** – generic entity activity history (entity_type/entity_id/action/changes)
+- **api_tokens** – hashed Bearer tokens for REST API authentication
+- **email_queue** – queued outbound emails (sent by cron)
+- **user_password_history** – password history for reuse prevention
+- **user_sessions** – active session tracking per user/device
 
-- **projects** – id, name, description, coordinator_id, created_at, updated_at
-- **profiles** – id, papsid, control_number, full_name, age, contact_number, project_id, plus many profile-specific fields (migration_003), created_at, updated_at
-- **structures** – id, strid, owner_id (→ profiles.id), structure_tag, description, tagging_images, structure_images, other_details, created_at, updated_at
-- **user_profiles** – legacy per-user profile (single row per user); still present. display_name moved to users (migration_015).
-- **user_projects** – user_id, project_id (junction: user linked to many projects); migration_015
-
-### 4.3 Grievance module
-
-- **grievances** – migration_005, 009 (project_id), 012 (attachments), etc.
-- **grievance_status_log** – migration_008, 014
-- Lookup tables: grievance_vulnerabilities, grievance_respondent_types, grievance_grm_channels, grievance_preferred_languages, grievance_types, grievance_categories, grievance_progress_levels (migrations 005–011, etc.)
-- **grievance_progress_levels** is project-scoped (migration_026):
-  - `project_id` = project-specific stage
-  - `project_id IS NULL` = default fallback stages (`Level 1/2/3`) used when a project has no custom setup yet
-
-### 4.4 User preferences and notifications
-
-- **user_dashboard_config** – user_id, module, config (JSON), updated_at. Modules: `ui` (UserUiSettings), `notification_preferences` (UserNotificationSettings), grievance dashboard widgets, list columns (migration_004), etc.
-- **notifications** – id, user_id, type, related_type, related_id, project_id (migration_019), message, created_at, clicked_at (migration_019). Used for in-app notifications; bell shows unread (clicked_at IS NULL); history page shows all with filters.
-- **email_queue** – id, to_email, subject, body, created_at, sent_at, status (pending/sent/failed), error_message (migration_021). Notification emails are enqueued here; sent in background by `php cli/send_queued_emails.php` (run via cron every 1–5 min).
-
-### 4.5 User password history (migration_022)
-
-- **user_password_history** – id, user_id, password_hash, changed_at. Used to enforce password history (prevent reuse of last N passwords) via `App\PasswordPolicy`.
-
-### 4.6 Audit and history
-
-- **audit_log** – id, entity_type, entity_id, action (e.g. created, updated, status_changed), changes (JSON), created_at, created_by. Used for Activity History on profile/structure/grievance view pages (partials/history_sidebar.php).
-
-### 4.7 API and sessions
-
-- **api_tokens** (migration 020) – id, user_id, token_hash, expires_at. REST Bearer tokens; hashed storage; validated by `App\ApiToken`.
-- **user_sessions** (migration 023) – id, user_id, session_id, user_agent, ip_address, created_at, last_activity_at, revoked_at. Tracks active logins per user for "Account > Sessions" and "logout other devices" (`App\UserSession`, `SessionsController`).
+### 4.3 Extending the schema
+Add your own tables via new migrations (e.g. `migration_002_...`, `migration_003_...`) and then create:
+- model(s) under `App/Models/`
+- controllers + views
+- capabilities in `App/Capabilities.php` and seed/assign role_capabilities as needed.
 
 ---
 
@@ -143,30 +114,32 @@ paper/
 - Run: `php cli/migrate.php`. Status: `php cli/migrate.php --status`.
 - Rollback: `php cli/migrate.php --rollback` (undo last migration) or `php cli/migrate.php --rollback --steps=2` (undo last 2 migrations). Rollback runs in LIFO order (most recently applied first). Each migration must have a callable `down` to be rolled back.
 - Migrations run in filename order; applied names stored in `migrations` table.
-- List (as of this guide): 000 (initial), 001 (EAV→flat), 002–014 (scalability, profile fields, list columns, grievance, status, progress levels, dashboard config, grievance attachments, indexes, etc.), 015 (display_name, user_projects), 016 (notifications), 017 (notification defaults for all users), 018 (audit_log), 019 (notifications project_id, clicked_at), 020 (api_tokens), 021 (email_queue), 022 (email_queue_body_format; password policy: password_changed_at, user_password_history), 023 (user_sessions), 024 (name parts), 025 (grievance_respondents), 026 (project-scoped grievance progress levels), 027 (escalation query indexes for grievance_status_log).
+- List (as of this guide): 000 (initial), 001 (platform). Add more migrations as you introduce product-specific modules.
 - **Cron:** Run `php cli/send_queued_emails.php` periodically (e.g. every 1–5 min) to send notification emails from `email_queue`.
 
 ---
 
 ## 6. Important conventions
 
-- **Capabilities:** Defined in `App\Capabilities`. Menu visibility and controller access use `Auth::can('capability_name')`. Add new entities/capabilities there and seed role_capabilities if needed.
-- **User projects:** `App\UserProjects::allowedProjectIds()` – null = all projects (e.g. admin), empty array = none, else list of project IDs. Used to restrict profile/structure/grievance/list and notification project filter.
-- **Notifications:** `App\NotificationService` – notifyNewProfile, notifyProfileUpdated, notifyNewGrievance, notifyGrievanceStatusChange, notifyNewStructure. Preferences in UserNotificationSettings; stored in user_dashboard_config. When "Send email for project notifications" is on (Email settings), emails are queued in email_queue and sent by `php cli/send_queued_emails.php` (schedule via cron so save/update responses stay fast).
-- **Audit log:** `App\AuditLog::record($entityType, $entityId, $action, $changes)`. Used in Profile, Structure, Grievance controllers for create/update/status. View via `AuditLog::for($entityType, $entityId)` and `partials/history_sidebar.php`.
+- **Capabilities:** Defined in `App\Capabilities`. Menu visibility and controller access use `Auth::can('capability_name')`.
+- **Notifications:** `App\NotificationService`
+  - In-app history + dropdown uses `getForUser()` / `listForUser()`
+  - Product-specific events should call scaffold helpers (extend NotificationService when you add modules)
+  - Per-user toggles live in `App\UserNotificationSettings` (scaffold-only by default).
+- **Email delivery:** queued in `email_queue` and sent by `php cli/send_queued_emails.php` (cron).
+- **Audit log:** `App\AuditLog::record($entityType, $entityId, $action, $changes)`. Read via `App\AuditLog::for(...)` / `forPaginated(...)` and display via `App/Views/partials/history_sidebar.php`.
 - **Login throttling:** `Core\LoginThrottle` reads settings from `App\Models\AppSettings::getSecurityConfig()` (login_throttle_enabled, login_throttle_max_attempts, login_throttle_lockout_minutes). Throttling can be enabled/disabled and tuned via Security Settings. When disabled, LoginThrottle is a no-op.
 - **Password policy:** `App\PasswordPolicy` enforces admin-configured rules on new/changed passwords: minimum length, required character classes, optional expiry (`password_expiry_days`), and history (`password_history_limit`). UserController uses this when creating/updating users; Auth controllers enforce expiry on login (web and API).
 - **Views:** Layout in `App/Views/layout/main.php`; `$currentPage` and `$pageTitle` for nav/title; `$content` for main body (views often use ob_start() and then require main.php).
 - **List pages:** Use list_pagination.php and list_toolbar.php; pass listPagination, listBaseUrl, listExtraParams for filters (e.g. notifications page).
-- **List columns and export:** `App\ListConfig` defines table columns (`getColumns`) and export columns (`getExportColumns`). Both the **Select Columns** and **Export** dialogs use `listExportColumns` (from `getExportColumns`) so users can choose from all available fields, not just table columns. Pass `listExportColumns` in index view data; controllers validate selected columns against export config. Export routes: `/profile/export`, `/structure/export`, `/grievance/export`, `/users/export`, `/library/export`. `App\CsvExporter::stream($filename, $headers, $rows, $keys)` produces CSV. Grievance export uses `Grievance::listForExport()` to fetch full rows with resolved lookup names (vulnerabilities, respondent types, GRM channels, etc.).
-- **Truncate scripts:** `truncate_seed_tables.php` truncates notifications, audit_log, structures, profiles, projects (with FOREIGN_KEY_CHECKS). `truncate_grievances.php` truncates grievance_status_log, grievances. After truncate, re-seed as needed; migrations and user/preference data remain.
+- **List columns and export:** `App\ListConfig` defines list columns (`getColumns`) and export columns (`getExportColumns`). Views pass `listColumns` + `listExportColumns`; controllers validate selected keys before calling `App\CsvExporter::stream(...)`.
 - **User sessions:** `App\UserSession::onLogin()` registers the current session on login; `UserSession::touchOrEnforceForCurrent()` runs each request (updates last_activity_at; enforces max concurrent sessions if configured). Active sessions page: `/account/sessions` (SessionsController); users can log out other devices.
 - **API auth:** `App\ApiToken::create()`, `validate()`, `revoke()`. Bearer token sent in `Authorization: Bearer <token>`. API login at `POST /api/auth/login` returns a token when email-based 2FA is disabled (or after 2FA flow if enabled).
 - **2FA:** When Security Settings enable email 2FA, web login redirects to `/login/2fa`; user enters code sent by email; `AuthController@twoFactorVerify` completes login. API login can require 2FA depending on implementation.
 - **Idle logout:** `Core\Auth::init()` checks `user_logout_after_minutes` (from app_settings); after inactivity, session is destroyed and user redirected to `/login?timeout=1`. Not applied to API (Bearer) requests.
 - **DevClock:** `App\DevClock` provides optional simulated "current" time for development (System > Development); e.g. for testing scheduled behaviour without changing system time.
-- **Escalation behavior:** escalation uses the start of the current in-progress segment (transition-aware) and does not reset on note-only updates with unchanged status/level. It resets only on real status/level changes.
-- **Serve routes:** `/serve/structure`, `/serve/profile`, `/serve/grievance`, `/serve/grievance-card-attachment`, `/serve/app-logo` serve uploaded images, attachments, and app logo (StructureController, ProfileController, GrievanceController, AssetController).
+- **Product-specific workflows:** Not included in the scaffold by default. Add workflow logic in your module controllers/models and record key events in `audit_log`.
+- **Serve routes:** not part of the scaffold by default. Add `/serve/*` endpoints when your product introduces file uploads.
 
 ---
 
