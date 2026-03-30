@@ -1,0 +1,55 @@
+{
+  "meta": {
+    "workspace": "c:\\xampp\\htdocs",
+    "generated_at": "2026-03-30",
+    "language": "en"
+  },
+  "summary": [
+    {
+      "topic": "Codebase study & mapping",
+      "details": [
+        "Explored the PHP app structure (front controller `public/index.php`, routing via `Core\\Router`, controllers under `App\\Controllers`, views under `App\\Views`, models under `App\\Models`, and DB schema migrations under `database/`.)",
+        "Identified that the original app was domain-specific (PAPeR/GRM) with modules for profiles, structures, grievances, library, options library, and related APIs, plus admin/security/audit scaffolding."
+      ]
+    },
+    {
+      "topic": "Goal: make the scaffold reusable for other systems",
+      "details": [
+        "User requested removing domain-specific traces/current objectives while keeping the basic admin/development scaffold so it can be reused for other systems.",
+        "We investigated RBAC/capabilities (`App\\Capabilities`), routing (`public/index.php`), and tenant scoping hooks (`App\\UserProjects`).",
+        "We replaced `public/index.php` routing to keep only generic admin modules (auth, dashboard, settings/system, users/roles, notifications, and minimal API endpoints).",
+        "We created new minimal migrations: `database/migration_000_initial.php` and `database/migration_001_platform.php`, and removed older domain migrations (`migration_001`–`migration_027`) plus domain seeds/CLI/domain modules.",
+        "We simplified core scaffold files to match the new generic scope (e.g., `App\\Capabilities`, `App\\ListConfig`, `App\\UserProjects` as a no-op by default, `App\\Controllers\\UserController`, and scaffold-level `App\\Controllers\\Api\\DashboardController` and `ApiController`).",
+        "We simplified/adjusted notification + settings scaffolding to generic terminology and removed module-specific notification preference UI fields.",
+        "We updated in-app layout branding/labels (e.g., “Admin App”, “My account”, generic help/admin guide wording) and replaced PAPeR-specific strings."
+      ]
+    },
+    {
+      "topic": "Documentation alignment",
+      "details": [
+        "User asked whether documentation was updated; we checked Markdown docs and in-app help pages.",
+        "We updated `DEVELOPMENTGUIDE.md` and `CHANGES.md` to reflect the reusable admin scaffold state (minimal migrations 000/001, extension points, and removal of domain-specific module references).",
+        "We also updated in-app help pages: `App\\Views\\help\\index.php` and `App\\Views\\admin\\guide.php` to match the scaffold approach."
+      ]
+    },
+    {
+      "topic": "New product planning: Church multi-tenant web app",
+      "details": [
+        "User wants a web application for a church organization: many churches with a Central Office.",
+        "Confirmed requirements: MVP first (members directory + announcements + service schedule + attendance). Giving/donations later.",
+        "Access model: one domain only (same app, no subdomains).",
+        "Data sensitivity: strict audit + retention policy required (especially around member personal info and audit records).",
+        "Proposed plan: multi-tenant schema using a `church_id` scoped design; Central Office can view/manage across churches, church staff scoped to their assigned church(s).",
+        "MVP table suggestions: `churches`, `user_churches`, `members`, `announcements`, `services`, `attendance_sessions`, `attendance_records`—all church-scoped with indexes.",
+        "Audit strategy: reuse scaffold `audit_log` pattern; ensure key write actions log changes and recommend storing `church_id` in audit for fast filtering.",
+        "Retention strategy: implement soft-archive fields (e.g., `archived_at` / locked states) and a planned purge job (cron/CLI) driven by retention years stored in settings."
+      ]
+    }
+  ],
+  "open_questions_for_tomorrow": [
+    "For attendance MVP: do you want per-member status only (present/absent) or also groups/roles per service?",
+    "Who can edit members in MVP (Church Admin only vs additional staff roles)?",
+    "Retention strictness: should audit log be effectively permanent, or is there a target retention duration (e.g., 5/7/10 years) for audit and member PII?"
+  ]
+}
+
