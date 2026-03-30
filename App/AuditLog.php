@@ -95,7 +95,7 @@ class AuditLog
     }
 
     /**
-     * Paginated list for Audit Trail (all modules: user, profile, structure, grievance).
+     * Paginated list for Audit Trail (filter by entity_type, dates, actor).
      *
      * @param array $filters ['module' => entity_type, 'from' => date, 'to' => date, 'user_id' => created_by]
      * @return array{items: array, total: int, page: int, per_page: int, total_pages: int}
@@ -110,7 +110,7 @@ class AuditLog
         $params = [];
 
         $module = $filters['module'] ?? '';
-        if (in_array($module, ['user', 'profile', 'structure', 'grievance'], true)) {
+        if (is_string($module) && $module !== '' && preg_match('/^[a-z][a-z0-9_]{0,49}$/', $module)) {
             $where[] = 'a.entity_type = :entity_type';
             $params['entity_type'] = $module;
         }

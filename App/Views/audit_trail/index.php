@@ -23,22 +23,18 @@ function audit_trail_action_label(string $action): string {
 function audit_trail_module_label(string $type): string {
     return match ($type) {
         'user' => 'Users',
-        'profile' => 'Profiles',
-        'structure' => 'Structures',
-        'grievance' => 'Grievances',
-        default => ucfirst($type),
+        default => ucfirst(str_replace('_', ' ', $type)),
     };
 }
 
 function audit_trail_entity_url(object $row): ?string {
     $type = $row->entity_type ?? '';
     $id = (int) ($row->entity_id ?? 0);
-    if ($id <= 0) return null;
+    if ($id <= 0) {
+        return null;
+    }
     return match ($type) {
         'user' => '/users/view/' . $id,
-        'profile' => '/profile/view/' . $id,
-        'structure' => '/structure/view/' . $id,
-        'grievance' => '/grievance/view/' . $id,
         default => null,
     };
 }
@@ -84,9 +80,6 @@ ob_start();
                 <select id="module" name="module" class="form-select">
                     <option value="">All</option>
                     <option value="user" <?= ($filters['module'] ?? '') === 'user' ? 'selected' : '' ?>>Users</option>
-                    <option value="profile" <?= ($filters['module'] ?? '') === 'profile' ? 'selected' : '' ?>>Profiles</option>
-                    <option value="structure" <?= ($filters['module'] ?? '') === 'structure' ? 'selected' : '' ?>>Structures</option>
-                    <option value="grievance" <?= ($filters['module'] ?? '') === 'grievance' ? 'selected' : '' ?>>Grievances</option>
                 </select>
             </div>
             <div class="col-md-3">

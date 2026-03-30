@@ -7,11 +7,9 @@ $currentPage = $currentPage ?? '';
 $devClockSimulated = \Core\Auth::id() && \App\DevClock::isOverridden();
 $devClockDate = $devClockSimulated ? \App\DevClock::getOverride() : null;
 $branding = \App\Models\AppSettings::getBrandingConfig();
-$defaultTitle = $branding->app_name ?? 'PAPeR';
+$defaultTitle = $branding->app_name ?? 'Admin App';
 if (!empty($branding->company_name)) {
-    $defaultTitle .= ' - ' . $branding->company_name;
-} else {
-    $defaultTitle .= ' - Project Affected Profiles and Redress';
+    $defaultTitle .= ' — ' . $branding->company_name;
 }
 $baseUrl = defined('BASE_URL') ? rtrim(BASE_URL, '/') : '';
 $logoPath = $branding->logo_path ?? '';
@@ -127,45 +125,8 @@ $logoUrl = $logoPath !== '' ? $baseUrl . '/serve/app-logo' : '';
             <?php if ($logoUrl !== ''): ?>
                 <img src="<?= htmlspecialchars($logoUrl) ?>" alt="<?= htmlspecialchars($branding->app_name ?? 'Logo') ?>" style="height:24px;width:auto;margin-right:0.4rem;vertical-align:middle;object-fit:contain;">
             <?php endif; ?>
-            <?= htmlspecialchars($branding->app_name ?? 'PAPeR') ?>
+            <?= htmlspecialchars($branding->app_name ?? 'Admin App') ?>
         </a>
-        <?php if (\Core\Auth::can('view_profiles')): ?>
-        <a href="/profile" class="nav-link <?= $currentPage === 'profile' ? 'active' : '' ?>">Profile</a>
-        <?php endif; ?>
-        <?php if (\Core\Auth::can('view_structure')): ?>
-        <a href="/structure" class="nav-link <?= $currentPage === 'structure' ? 'active' : '' ?>">Structure</a>
-        <?php endif; ?>
-        <?php if (\Core\Auth::can('view_grievance') || \Core\Auth::can('manage_grievance_options')): ?>
-        <?php $grievanceActive = in_array($currentPage, ['grievance', 'grievance-dashboard', 'grievance-list', 'grievance-respondents', 'grievance-vulnerabilities', 'grievance-respondent-types', 'grievance-grm-channels', 'grievance-preferred-languages', 'grievance-types', 'grievance-categories', 'grievance-progress-levels']); ?>
-        <div class="dropdown">
-            <a href="#" class="nav-link dropdown-toggle <?= $grievanceActive ? 'active' : '' ?>" data-bs-toggle="dropdown">Grievance</a>
-            <ul class="dropdown-menu">
-                <?php if (\Core\Auth::can('view_grievance')): ?>
-                <li><a class="dropdown-item <?= $currentPage === 'grievance-dashboard' ? 'active' : '' ?>" href="/grievance">Dashboard</a></li>
-                <li><a class="dropdown-item <?= $currentPage === 'grievance-list' ? 'active' : '' ?>" href="/grievance/list">Grievances</a></li>
-                <li><a class="dropdown-item <?= $currentPage === 'grievance-respondents' ? 'active' : '' ?>" href="/grievance/respondents">Respondent Profiles</a></li>
-                <?php endif; ?>
-                <?php if (\Core\Auth::can('manage_grievance_options')): ?>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item <?= $currentPage === 'grievance-vulnerabilities' ? 'active' : '' ?>" href="/grievance/options/vulnerabilities">Vulnerabilities</a></li>
-                <li><a class="dropdown-item <?= $currentPage === 'grievance-respondent-types' ? 'active' : '' ?>" href="/grievance/options/respondent-types">Respondent Type</a></li>
-                <li><a class="dropdown-item <?= $currentPage === 'grievance-grm-channels' ? 'active' : '' ?>" href="/grievance/options/grm-channels">GRM Channel</a></li>
-                <li><a class="dropdown-item <?= $currentPage === 'grievance-preferred-languages' ? 'active' : '' ?>" href="/grievance/options/preferred-languages">Preferred Language</a></li>
-                <li><a class="dropdown-item <?= $currentPage === 'grievance-types' ? 'active' : '' ?>" href="/grievance/options/types">Type of Grievances</a></li>
-                <li><a class="dropdown-item <?= $currentPage === 'grievance-categories' ? 'active' : '' ?>" href="/grievance/options/categories">Category of Grievance</a></li>
-                <li><a class="dropdown-item <?= $currentPage === 'grievance-progress-levels' ? 'active' : '' ?>" href="/grievance/options/progress-levels">In Progress Stages</a></li>
-                <?php endif; ?>
-            </ul>
-        </div>
-        <?php endif; ?>
-        <?php if (\Core\Auth::can('view_projects')): ?>
-        <div class="dropdown">
-            <a href="#" class="nav-link dropdown-toggle <?= $currentPage === 'library' ? 'active' : '' ?>" data-bs-toggle="dropdown">Library</a>
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item <?= $currentPage === 'library' ? 'active' : '' ?>" href="/library">Project</a></li>
-            </ul>
-        </div>
-        <?php endif; ?>
         <?php if (\Core\Auth::can('view_settings') || \Core\Auth::can('view_security_settings')): ?>
         <?php $settingsActive = in_array($currentPage, ['settings']); ?>
         <div class="dropdown">
@@ -233,7 +194,7 @@ $logoUrl = $logoPath !== '' ? $baseUrl . '/serve/app-logo' : '';
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="/account">My Profile</a></li>
+            <li><a class="dropdown-item" href="/account">My account</a></li>
             <li><a class="dropdown-item" href="/account/sessions">Active sessions</a></li>
             <li><a class="dropdown-item" href="/notifications">Notifications</a></li>
             <li><hr class="dropdown-divider"></li>
@@ -252,42 +213,9 @@ $logoUrl = $logoPath !== '' ? $baseUrl . '/serve/app-logo' : '';
             <?php if ($logoUrl !== ''): ?>
                 <img src="<?= htmlspecialchars($logoUrl) ?>" alt="<?= htmlspecialchars($branding->app_name ?? 'Logo') ?>" style="height:24px;width:auto;margin-right:0.4rem;vertical-align:middle;object-fit:contain;">
             <?php endif; ?>
-            <?= htmlspecialchars($branding->app_name ?? 'PAPeR') ?>
+            <?= htmlspecialchars($branding->app_name ?? 'Admin App') ?>
         </a>
         <nav class="py-2">
-            <?php if (\Core\Auth::can('view_profiles')): ?>
-            <a href="/profile" class="<?= $currentPage === 'profile' ? 'active' : '' ?>">Profile</a>
-            <?php endif; ?>
-            <?php if (\Core\Auth::can('view_structure')): ?>
-            <a href="/structure" class="<?= $currentPage === 'structure' ? 'active' : '' ?>">Structure</a>
-            <?php endif; ?>
-            <?php if (\Core\Auth::can('view_grievance') || \Core\Auth::can('manage_grievance_options')): ?>
-            <?php $grievanceActive = in_array($currentPage, ['grievance', 'grievance-dashboard', 'grievance-list', 'grievance-respondents', 'grievance-vulnerabilities', 'grievance-respondent-types', 'grievance-grm-channels', 'grievance-preferred-languages', 'grievance-types', 'grievance-categories', 'grievance-progress-levels']); ?>
-            <div class="nav-parent <?= $grievanceActive ? 'open' : '' ?>">Grievance</div>
-            <div class="nav-sub">
-                <?php if (\Core\Auth::can('view_grievance')): ?>
-                <a href="/grievance" class="<?= $currentPage === 'grievance-dashboard' ? 'active' : '' ?>">Dashboard</a>
-                <a href="/grievance/list" class="<?= $currentPage === 'grievance-list' ? 'active' : '' ?>">Grievances</a>
-                <a href="/grievance/respondents" class="<?= $currentPage === 'grievance-respondents' ? 'active' : '' ?>">Respondent Profiles</a>
-                <?php endif; ?>
-                <?php if (\Core\Auth::can('manage_grievance_options')): ?>
-                <span class="sidebar-nav-label">Options Library</span>
-                <a href="/grievance/options/vulnerabilities" class="<?= $currentPage === 'grievance-vulnerabilities' ? 'active' : '' ?>">Vulnerabilities</a>
-                <a href="/grievance/options/respondent-types" class="<?= $currentPage === 'grievance-respondent-types' ? 'active' : '' ?>">Respondent Type</a>
-                <a href="/grievance/options/grm-channels" class="<?= $currentPage === 'grievance-grm-channels' ? 'active' : '' ?>">GRM Channel</a>
-                <a href="/grievance/options/preferred-languages" class="<?= $currentPage === 'grievance-preferred-languages' ? 'active' : '' ?>">Preferred Language</a>
-                <a href="/grievance/options/types" class="<?= $currentPage === 'grievance-types' ? 'active' : '' ?>">Type of Grievances</a>
-                <a href="/grievance/options/categories" class="<?= $currentPage === 'grievance-categories' ? 'active' : '' ?>">Category of Grievance</a>
-                <a href="/grievance/options/progress-levels" class="<?= $currentPage === 'grievance-progress-levels' ? 'active' : '' ?>">In Progress Stages</a>
-                <?php endif; ?>
-            </div>
-            <?php endif; ?>
-            <?php if (\Core\Auth::can('view_projects')): ?>
-            <div class="nav-parent <?= $currentPage === 'library' ? 'open' : '' ?>">Library</div>
-            <div class="nav-sub">
-                <a href="/library" class="<?= $currentPage === 'library' ? 'active' : '' ?>">Project</a>
-            </div>
-            <?php endif; ?>
             <?php if (\Core\Auth::can('view_settings') || \Core\Auth::can('view_security_settings')): ?>
             <?php $settingsActive = in_array($currentPage, ['settings']); ?>
             <div class="nav-parent <?= $settingsActive ? 'open' : '' ?>">Settings</div>
@@ -359,7 +287,7 @@ $logoUrl = $logoPath !== '' ? $baseUrl . '/serve/app-logo' : '';
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/></svg>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="/account">My Profile</a></li>
+                <li><a class="dropdown-item" href="/account">My account</a></li>
                 <li><a class="dropdown-item" href="/account/sessions">Active sessions</a></li>
                 <li><a class="dropdown-item" href="/notifications">Notifications</a></li>
                 <li><hr class="dropdown-divider"></li>

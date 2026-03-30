@@ -33,7 +33,7 @@ ob_start();
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">App name</label>
-                    <input type="text" name="app_name" class="form-control" value="<?= htmlspecialchars($branding->app_name ?? 'PAPeR') ?>" maxlength="100">
+                    <input type="text" name="app_name" class="form-control" value="<?= htmlspecialchars($branding->app_name ?? 'Admin App') ?>" maxlength="100">
                     <small class="text-muted d-block mt-1">Shown in the header and as the default part of the page title.</small>
                 </div>
                 <div class="col-md-6">

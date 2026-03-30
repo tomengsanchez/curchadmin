@@ -2,7 +2,6 @@
 $uiTheme = $uiTheme ?? \App\UserUiSettings::THEME_DEFAULT;
 $uiLayout = $uiLayout ?? \App\UserUiSettings::LAYOUT_SIDEBAR;
 $uiMobileFriendly = $uiMobileFriendly ?? false;
-$notifyPrefs = $notifyPrefs ?? \App\UserNotificationSettings::get();
 $themes = \App\UserUiSettings::themes();
 $layouts = \App\UserUiSettings::layouts();
 ob_start();
@@ -13,10 +12,6 @@ ob_start();
 <?php if (!empty($_SESSION['settings_ui_saved'])): unset($_SESSION['settings_ui_saved']); ?>
 <div class="alert alert-success alert-dismissible fade show">UI preferences saved.</div>
 <?php endif; ?>
-<?php if (!empty($_SESSION['settings_notifications_saved'])): unset($_SESSION['settings_notifications_saved']); ?>
-<div class="alert alert-success alert-dismissible fade show">Notification preferences saved.</div>
-<?php endif; ?>
-
 <div class="card mb-4">
     <div class="card-header">
         <h5 class="mb-0">Custom UI</h5>
@@ -66,36 +61,10 @@ ob_start();
 
 <div class="card mb-4">
     <div class="card-header">
-        <h5 class="mb-0">Notification Settings</h5>
+        <h5 class="mb-0">Notifications</h5>
     </div>
     <div class="card-body">
-        <p class="text-muted small mb-4">Notify the logged-in user when the following events occur on linked projects.</p>
-        <form method="post" action="/settings/notifications">
-            <?= \Core\Csrf::field() ?>
-            <div class="d-flex flex-column gap-2">
-                <label class="d-flex align-items-center gap-2">
-                    <input type="checkbox" name="notify_new_profile" value="1" class="form-check-input" <?= !empty($notifyPrefs['notify_new_profile']) ? 'checked' : '' ?>>
-                    <span>New Profile on the linked projects</span>
-                </label>
-                <label class="d-flex align-items-center gap-2">
-                    <input type="checkbox" name="notify_profile_updated" value="1" class="form-check-input" <?= !empty($notifyPrefs['notify_profile_updated']) ? 'checked' : '' ?>>
-                    <span>Profile updated on the linked projects</span>
-                </label>
-                <label class="d-flex align-items-center gap-2">
-                    <input type="checkbox" name="notify_new_grievance" value="1" class="form-check-input" <?= !empty($notifyPrefs['notify_new_grievance']) ? 'checked' : '' ?>>
-                    <span>New Grievance on the linked projects</span>
-                </label>
-                <label class="d-flex align-items-center gap-2">
-                    <input type="checkbox" name="notify_grievance_status_change" value="1" class="form-check-input" <?= !empty($notifyPrefs['notify_grievance_status_change']) ? 'checked' : '' ?>>
-                    <span>Grievance status change on the linked projects</span>
-                </label>
-                <label class="d-flex align-items-center gap-2">
-                    <input type="checkbox" name="notify_grievance_updated" value="1" class="form-check-input" <?= !empty($notifyPrefs['notify_grievance_updated']) ? 'checked' : '' ?>>
-                    <span>Grievance updated (edit) on the linked projects</span>
-                </label>
-            </div>
-            <button type="submit" class="btn btn-primary mt-3">Save notification preferences</button>
-        </form>
+        <p class="text-muted small mb-0">Product-specific notification toggles live in <code>App\UserNotificationSettings</code> when you add modules. Email delivery uses SMTP under <strong>System → SMTP settings</strong>.</p>
     </div>
 </div>
 

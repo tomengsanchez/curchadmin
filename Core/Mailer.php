@@ -75,7 +75,7 @@ class Mailer
             }
         }
         $from = $config->from_email ?: $config->smtp_username ?: 'noreply@localhost';
-        $fromName = $config->from_name ?: 'PAPeR';
+        $fromName = $config->from_name ?: 'Admin App';
         $write('MAIL FROM:<' . $from . '>');
         $read();
         $write('RCPT TO:<' . $to . '>');

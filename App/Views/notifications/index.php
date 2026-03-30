@@ -2,7 +2,6 @@
 $notifications = $notifications ?? [];
 $filters = $filters ?? ['from' => '', 'to' => '', 'module' => '', 'project_id' => null];
 $pagination = $pagination ?? ['page' => 1, 'per_page' => 20, 'total' => 0, 'total_pages' => 0];
-$projects = $projects ?? [];
 ob_start();
 ?>
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -20,23 +19,10 @@ ob_start();
                 <input type="date" id="to" name="to" class="form-control" value="<?= htmlspecialchars($filters['to'] ?? '') ?>">
             </div>
             <div class="col-md-3">
-                <label for="module" class="form-label">Module</label>
+                <label for="module" class="form-label">Related type</label>
                 <select id="module" name="module" class="form-select">
                     <option value="">All</option>
-                    <option value="<?= \App\NotificationService::RELATED_PROFILE ?>" <?= ($filters['module'] ?? '') === \App\NotificationService::RELATED_PROFILE ? 'selected' : '' ?>>Profile</option>
-                    <option value="<?= \App\NotificationService::RELATED_STRUCTURE ?>" <?= ($filters['module'] ?? '') === \App\NotificationService::RELATED_STRUCTURE ? 'selected' : '' ?>>Structure</option>
-                    <option value="<?= \App\NotificationService::RELATED_GRIEVANCE ?>" <?= ($filters['module'] ?? '') === \App\NotificationService::RELATED_GRIEVANCE ? 'selected' : '' ?>>Grievance</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label for="project_id" class="form-label">Project</label>
-                <select id="project_id" name="project_id" class="form-select">
-                    <option value="">All</option>
-                    <?php foreach ($projects as $p): ?>
-                    <option value="<?= (int)$p->id ?>" <?= (string)($filters['project_id'] ?? '') === (string)$p->id ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($p->name ?? ('Project #' . (int)$p->id)) ?>
-                    </option>
-                    <?php endforeach; ?>
+                    <option value="<?= htmlspecialchars(\App\NotificationService::RELATED_SYSTEM) ?>" <?= ($filters['module'] ?? '') === \App\NotificationService::RELATED_SYSTEM ? 'selected' : '' ?>>System</option>
                 </select>
             </div>
             <div class="col-12 d-flex gap-2">
@@ -63,20 +49,7 @@ ob_start();
                 <tr>
                     <td><?= htmlspecialchars($n->created_at ?? '') ?></td>
                     <td><?= htmlspecialchars($n->message ?? '') ?></td>
-                    <td>
-                        <?php
-                        $label = match ($n->type ?? '') {
-                            \App\NotificationService::TYPE_NEW_PROFILE => 'New Profile',
-                            \App\NotificationService::TYPE_PROFILE_UPDATED => 'Profile Updated',
-                            \App\NotificationService::TYPE_NEW_GRIEVANCE => 'New Grievance',
-                            \App\NotificationService::TYPE_GRIEVANCE_STATUS_CHANGE => 'Grievance Status Change',
-                            \App\NotificationService::TYPE_GRIEVANCE_UPDATED => 'Grievance Updated',
-                            \App\NotificationService::TYPE_NEW_STRUCTURE => 'New Structure',
-                            default => ucfirst((string)($n->type ?? '')),
-                        };
-                        ?>
-                        <?= htmlspecialchars($label) ?>
-                    </td>
+                    <td><?= htmlspecialchars(ucfirst((string)($n->type ?? 'notice'))) ?></td>
                     <td>
                         <?php if (!empty($n->clicked_at)): ?>
                             <span class="badge bg-secondary">Opened</span>
@@ -106,7 +79,6 @@ ob_start();
             'from' => $filters['from'] ?? '',
             'to' => $filters['to'] ?? '',
             'module' => $filters['module'] ?? '',
-            'project_id' => $filters['project_id'] ?? '',
         ];
         include __DIR__ . '/../partials/list_pagination.php';
         ?>

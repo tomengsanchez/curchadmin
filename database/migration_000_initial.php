@@ -1,8 +1,8 @@
 <?php
 /**
- * Migration 000: Initial base schema (roles, users, app_settings, role_capabilities)
+ * Migration 000: Base schema — roles, users, app_settings, role_capabilities
  *
- * Run first. Required for auth and app settings.
+ * Generic admin scaffold. Run first.
  */
 return [
     'name' => 'migration_000_initial',
@@ -19,7 +19,9 @@ return [
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 username VARCHAR(100) NOT NULL UNIQUE,
                 email VARCHAR(255) DEFAULT NULL,
+                display_name VARCHAR(255) NULL DEFAULT NULL,
                 password_hash VARCHAR(255) NOT NULL,
+                password_changed_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
                 role_id INT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -54,20 +56,21 @@ return [
         $adminId = $db->query("SELECT id FROM roles WHERE name = 'Administrator'")->fetchColumn();
         $coordId = $db->query("SELECT id FROM roles WHERE name = 'Coordinator'")->fetchColumn();
         $caps = [
-            'add_grievance','add_profiles','add_projects','add_structure','add_user_profiles','add_users',
-            'change_grievance_status',
-            'delete_grievance','delete_profiles','delete_projects','delete_structure','delete_user_profiles','delete_users',
-            'edit_grievance','edit_profiles','edit_projects','edit_roles','edit_structure','edit_user_profiles','edit_users',
-            'manage_email_settings','manage_security_settings','manage_settings','view_email_settings',
-            'view_grievance','view_profiles','view_projects','view_roles','view_security_settings','view_settings',
-            'view_structure','view_user_profiles','view_users',
+            'add_users', 'delete_users', 'edit_roles', 'edit_users', 'export_users',
+            'manage_email_settings', 'manage_security_settings', 'manage_settings',
+            'view_email_settings', 'view_roles', 'view_security_settings', 'view_settings',
+            'view_users',
         ];
         $ins = $db->prepare('INSERT IGNORE INTO role_capabilities (role_id, capability) VALUES (?, ?)');
         if ($adminId) {
-            foreach ($caps as $c) $ins->execute([$adminId, $c]);
+            foreach ($caps as $c) {
+                $ins->execute([$adminId, $c]);
+            }
         }
         if ($coordId) {
-            foreach (['view_grievance','view_profiles','view_structure'] as $c) $ins->execute([$coordId, $c]);
+            foreach (['view_users'] as $c) {
+                $ins->execute([$coordId, $c]);
+            }
         }
     },
     'down' => null,

@@ -3,7 +3,6 @@ namespace App\Controllers;
 
 use Core\Controller;
 use App\UserUiSettings;
-use App\UserNotificationSettings;
 
 class SettingsController extends Controller
 {
@@ -16,28 +15,11 @@ class SettingsController extends Controller
     {
         $this->requireCapability('view_settings');
         $ui = UserUiSettings::get();
-        $notifyPrefs = UserNotificationSettings::get();
         $this->view('settings/index', [
             'uiTheme'         => $ui['theme'],
             'uiLayout'        => $ui['layout'],
             'uiMobileFriendly' => !empty($ui['mobile_friendly']),
-            'notifyPrefs'     => $notifyPrefs,
         ]);
-    }
-
-    public function updateNotifications(): void
-    {
-        $this->validateCsrf();
-        $this->requireCapability('view_settings');
-        UserNotificationSettings::save([
-            'notify_new_profile'             => !empty($_POST['notify_new_profile']),
-            'notify_profile_updated'         => !empty($_POST['notify_profile_updated']),
-            'notify_new_grievance'           => !empty($_POST['notify_new_grievance']),
-            'notify_grievance_status_change' => !empty($_POST['notify_grievance_status_change']),
-            'notify_grievance_updated'       => !empty($_POST['notify_grievance_updated']),
-        ]);
-        $_SESSION['settings_notifications_saved'] = true;
-        $this->redirect('/settings');
     }
 
     public function updateUi(): void

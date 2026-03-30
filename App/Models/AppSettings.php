@@ -126,7 +126,7 @@ class AppSettings
     public static function getBrandingConfig(): object
     {
         // Defaults keep existing behavior if not configured
-        $appName = self::get('app_name', 'PAPeR');
+        $appName = self::get('app_name', 'Admin App');
         $companyName = self::get('company_name', '');
         $logoPath = self::get('app_logo_path', '');
         return (object) [
@@ -141,7 +141,7 @@ class AppSettings
         $appName = trim($data['app_name'] ?? '');
         $companyName = trim($data['company_name'] ?? '');
         if ($appName === '') {
-            $appName = 'PAPeR';
+            $appName = 'Admin App';
         }
         self::set('app_name', $appName);
         self::set('company_name', $companyName);

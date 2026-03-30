@@ -55,7 +55,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">From Name</label>
-                        <input type="text" name="from_name" class="form-control" value="<?= htmlspecialchars($config->from_name) ?>" placeholder="PAPeR">
+                        <input type="text" name="from_name" class="form-control" value="<?= htmlspecialchars($config->from_name) ?>" placeholder="Admin App">
                     </div>
                     <div class="mb-3">
                         <div class="form-check">
@@ -63,7 +63,7 @@
                                 <?= !empty($config->enable_notification_emails) ? 'checked' : '' ?>>
                             <label class="form-check-label" for="enable_notification_emails">Send email for project notifications</label>
                         </div>
-                        <small class="text-muted">When enabled, users linked to a project receive an email when they get in-app notifications (new profile, profile updated, new grievance, grievance status change, new structure).</small>
+                        <small class="text-muted">When enabled, notification emails are queued when your code calls the notification/email helpers.</small>
                     </div>
                 </div>
             </div>
