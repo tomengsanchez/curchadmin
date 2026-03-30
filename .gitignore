@@ -1,0 +1,20 @@
+apache_error.log
+php_error.log
+
+# Application logs
+logs/*.log
+logs/*
+/postman/*
+
+xyz/*
+
+config/database.php
+config/app.php
+
+public/uploads/*
+
+dbdump/*
+
+flutter_app/*
+
+sample-imports/*
